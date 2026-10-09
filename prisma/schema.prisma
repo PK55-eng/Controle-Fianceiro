@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoTransacao {
+  RECEITA
+  DESPESA
+}
+
+model Conta {
+  id           Int         @id @default(autoincrement())
+  nome         String      @unique
+  tipo         String
+  saldoInicial Decimal     @default(0) @db.Decimal(12, 2)
+  transacoes   Transacao[]
+  criadoEm     DateTime    @default(now())
+}
+
+model Categoria {
+  id         Int           @id @default(autoincrement())
+  nome       String        @unique
+  tipo       TipoTransacao
+  transacoes Transacao[]
+}
+
+model Transacao {
+  id          Int           @id @default(autoincrement())
+  descricao   String
+  valor       Decimal       @db.Decimal(12, 2)
+  tipo        TipoTransacao
+  data        DateTime
+  contaId     Int
+  categoriaId Int
+  conta       Conta         @relation(fields: [contaId], references: [id], onDelete: Restrict)
+  categoria   Categoria     @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+  criadoEm    DateTime      @default(now())
+
+  @@index([data])
+  @@index([tipo])
+}

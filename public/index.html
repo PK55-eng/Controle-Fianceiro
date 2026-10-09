@@ -1,0 +1,1022 @@
+<!doctype html>
+
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>FinanSee</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- MENU LATERAL -->
+        <aside class="sidebar">
+
+            <div class="logo">
+
+                <div class="logo-icon">F</div>
+
+                <div>
+                    <strong>Usuario</strong>
+                    <span>Gestão financeira</span>
+                </div>
+
+            </div>
+
+            <nav>
+
+                <a href="#" class="menu-item ativo" id="menuDashboard">
+                    <span>▦</span>
+                    Dashboard
+                </a>
+
+                <a href="#" class="menu-item" id="menuTransacoes">
+                    <span>↔</span>
+                    Transações
+                </a>
+
+                <a href="#" class="menu-item" id="menuContas">
+                    <span>▣</span>
+                    Contas
+                </a>
+
+                <a href="#" class="menu-item" id="menuCategorias">
+                    <span>◉</span>
+                    Categorias
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <p></p>
+
+                <small>
+                    Controle suas finanças de forma simples.
+                </small>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTEÚDO -->
+        <main class="conteudo">
+
+            <!-- CABEÇALHO -->
+            <header>
+
+                <div>
+
+                    <p class="pagina">
+                        
+                    </p>
+
+                    <h1>
+                        Controle Financeiro
+                    </h1>
+
+                    <p class="bem-vindo">
+                        Acompanhe suas receitas e despesas.
+                    </p>
+
+                </div>
+
+                <button id="novo" class="botao-principal">
+                    <span>+</span>
+                    Nova transação
+                </button>
+
+            </header>
+
+
+            <!-- CARDS -->
+            <section class="cards">
+
+                <article class="card card-saldo">
+
+                    <div class="card-topo">
+
+                        <span>Saldo atual</span>
+
+                        <div class="icone-card">
+                            R$
+                        </div>
+
+                    </div>
+
+                    <strong id="saldo">
+                        R$ 0,00
+                    </strong>
+
+                    <small>
+                        Valor disponível
+                    </small>
+
+                </article>
+
+
+                <article class="card">
+
+                    <div class="card-topo">
+
+                        <span>Receitas</span>
+
+                        <div class="icone-card receita-bg">
+                            ↑
+                        </div>
+
+                    </div>
+
+                    <strong id="receitas">
+                        R$ 0,00
+                    </strong>
+
+                    <small class="texto-receita">
+                        Entradas registradas
+                    </small>
+
+                </article>
+
+
+                <article class="card">
+
+                    <div class="card-topo">
+
+                        <span>Despesas</span>
+
+                        <div class="icone-card despesa-bg">
+                            ↓
+                        </div>
+
+                    </div>
+
+                    <strong id="despesas">
+                        R$ 0,00
+                    </strong>
+
+                    <small class="texto-despesa">
+                        Saídas registradas
+                    </small>
+
+                </article>
+
+
+                <article class="card">
+
+                    <div class="card-topo">
+
+                        <span>Economia</span>
+
+                        <div class="icone-card economia-bg">
+                            ✓
+                        </div>
+
+                    </div>
+
+                    <strong id="economia">
+                        R$ 0,00
+                    </strong>
+
+                    <small>
+                        Receitas menos despesas
+                    </small>
+
+                </article>
+
+            </section>
+
+
+            <!-- GRÁFICO E CATEGORIAS -->
+            <section class="dashboard-grid">
+
+                <article class="panel grafico-panel">
+
+                    <div class="panel-titulo">
+
+                        <div>
+
+                            <h2>
+                                Evolução financeira
+                            </h2>
+
+                            <p>
+                                Receitas e despesas por período
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="grafico-container">
+                        <canvas id="grafico"></canvas>
+                    </div>
+
+                </article>
+
+
+                <article class="panel categorias-panel">
+
+                    <div class="panel-titulo">
+
+                        <div>
+
+                            <h2>
+                                Gastos por categoria
+                            </h2>
+
+                            <p>
+                                Onde seu dinheiro está sendo utilizado
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div id="categorias">
+
+                        <div class="mensagem-vazia">
+                            Nenhum gasto registrado.
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- TRANSAÇÕES -->
+            <section class="panel transacoes-panel" id="transacoes">
+
+                <div class="transacoes-cabecalho">
+
+                    <div>
+
+                        <h2>
+                            Transações recentes
+                        </h2>
+
+                        <p>
+                            Confira suas últimas movimentações
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FILTROS -->
+                <div class="filtros">
+
+                    <div class="filtro-campo">
+
+                        <label for="filtroTipo">
+                            Tipo
+                        </label>
+
+                        <select id="filtroTipo">
+
+                            <option value="">
+                                Todos os tipos
+                            </option>
+
+                            <option value="RECEITA">
+                                Receitas
+                            </option>
+
+                            <option value="DESPESA">
+                                Despesas
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filtro-campo">
+
+                        <label for="filtroCategoria">
+                            Categoria
+                        </label>
+
+                        <select id="filtroCategoria">
+
+                            <option value="">
+                                Todas as categorias
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filtro-campo">
+
+                        <label for="filtroDataInicial">
+                            De
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtroDataInicial"
+                        >
+
+                    </div>
+
+
+                    <div class="filtro-campo">
+
+                        <label for="filtroDataFinal">
+                            Até
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtroDataFinal"
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="limparFiltros"
+                        class="botao-limpar-filtros"
+                    >
+                        Limpar filtros
+                    </button>
+
+                </div>
+
+
+                <div class="table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Conta</th>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="lista"></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- ==================================================
+         NOVA TRANSAÇÃO
+    =================================================== -->
+
+    <dialog id="modal">
+
+        <form id="form">
+
+            <div class="modal-cabecalho">
+
+                <span class="modal-tag">
+                    MOVIMENTAÇÃO
+                </span>
+
+                <h2>
+                    Nova transação
+                </h2>
+
+                <p>
+                    Adicione uma receita ou despesa.
+                </p>
+
+            </div>
+
+
+            <label>
+
+                Descrição
+
+                <input
+                    id="descricao"
+                    placeholder="Ex: Supermercado"
+                    required
+                >
+
+            </label>
+
+
+            <div class="form-duplo">
+
+                <label>
+
+                    Valor
+
+                    <input
+                        id="valor"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Tipo
+
+                    <select id="tipo">
+
+                        <option value="DESPESA">
+                            Despesa
+                        </option>
+
+                        <option value="RECEITA">
+                            Receita
+                        </option>
+
+                    </select>
+
+                </label>
+
+            </div>
+
+
+            <label>
+
+                Categoria
+
+                <select id="categoria" required></select>
+
+            </label>
+
+
+            <label>
+
+                Conta
+
+                <select id="conta" required></select>
+
+            </label>
+
+
+            <label>
+
+                Data
+
+                <input
+                    id="data"
+                    type="date"
+                    required
+                >
+
+            </label>
+
+
+            <div class="actions">
+
+                <button
+                    type="button"
+                    id="cancelar"
+                    class="botao-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="botao-principal"
+                >
+                    Salvar transação
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- ==================================================
+         EDITAR TRANSAÇÃO
+    =================================================== -->
+
+    <dialog id="modalEditar">
+
+        <form id="formEditar">
+
+            <div class="modal-cabecalho">
+
+                <span class="modal-tag">
+                    MOVIMENTAÇÃO
+                </span>
+
+                <h2>
+                    Editar transação
+                </h2>
+
+                <p>
+                    Altere os dados da movimentação.
+                </p>
+
+            </div>
+
+
+            <input
+                type="hidden"
+                id="editarId"
+            >
+
+
+            <label>
+
+                Descrição
+
+                <input
+                    id="editarDescricao"
+                    required
+                >
+
+            </label>
+
+
+            <div class="form-duplo">
+
+                <label>
+
+                    Valor
+
+                    <input
+                        id="editarValor"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Tipo
+
+                    <select id="editarTipo">
+
+                        <option value="DESPESA">
+                            Despesa
+                        </option>
+
+                        <option value="RECEITA">
+                            Receita
+                        </option>
+
+                    </select>
+
+                </label>
+
+            </div>
+
+
+            <label>
+
+                Categoria
+
+                <select
+                    id="editarCategoria"
+                    required
+                ></select>
+
+            </label>
+
+
+            <label>
+
+                Conta
+
+                <select
+                    id="editarConta"
+                    required
+                ></select>
+
+            </label>
+
+
+            <label>
+
+                Data
+
+                <input
+                    id="editarData"
+                    type="date"
+                    required
+                >
+
+            </label>
+
+
+            <div class="actions">
+
+                <button
+                    type="button"
+                    id="cancelarEdicao"
+                    class="botao-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="botao-principal"
+                >
+                    Salvar alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- ==================================================
+         CONTAS
+    =================================================== -->
+
+    <dialog id="modalContas" class="modal-gerenciamento">
+
+        <div class="gerenciamento">
+
+            <div class="gerenciamento-topo">
+
+                <div>
+
+                    <span class="modal-tag">
+                        FINANCEIRO
+                    </span>
+
+                    <h2>
+                        Minhas contas
+                    </h2>
+
+                    <p>
+                        Gerencie as contas utilizadas nas suas movimentações.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="fechar-modal"
+                    id="fecharContas"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="gerenciamento-acoes">
+
+                <div>
+
+                    <strong>
+                        Contas cadastradas
+                    </strong>
+
+                    <p>
+                        Conta corrente, carteira, poupança e outras.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="botao-principal"
+                    id="novaConta"
+                >
+                    + Nova conta
+                </button>
+
+            </div>
+
+
+            <div
+                id="listaContas"
+                class="lista-gerenciamento"
+            >
+
+                <div class="mensagem-vazia">
+                    Carregando contas...
+                </div>
+
+            </div>
+
+        </div>
+
+    </dialog>
+
+
+    <!-- ==================================================
+         NOVA CONTA
+    =================================================== -->
+
+    <dialog id="modalNovaConta">
+
+        <form id="formConta">
+
+            <div class="modal-cabecalho">
+
+                <span class="modal-tag">
+                    CONTA
+                </span>
+
+                <h2>
+                    Nova conta
+                </h2>
+
+                <p>
+                    Cadastre uma conta para controlar suas movimentações.
+                </p>
+
+            </div>
+
+
+            <label>
+
+                Nome da conta
+
+                <input
+                    id="nomeConta"
+                    placeholder="Ex: Banco Principal"
+                    minlength="2"
+                    required
+                >
+
+            </label>
+
+
+            <label>
+
+                Tipo da conta
+
+                <select id="tipoConta" required>
+
+                    <option value="Conta Corrente">
+                        Conta Corrente
+                    </option>
+
+                    <option value="Poupança">
+                        Poupança
+                    </option>
+
+                    <option value="Carteira">
+                        Carteira
+                    </option>
+
+                    <option value="Conta Digital">
+                        Conta Digital
+                    </option>
+
+                    <option value="Investimento">
+                        Investimento
+                    </option>
+
+                    <option value="Outro">
+                        Outro
+                    </option>
+
+                </select>
+
+            </label>
+
+
+            <label>
+
+                Saldo inicial
+
+                <input
+                    id="saldoInicialConta"
+                    type="number"
+                    step="0.01"
+                    value="0"
+                    required
+                >
+
+            </label>
+
+
+            <div class="actions">
+
+                <button
+                    type="button"
+                    id="cancelarConta"
+                    class="botao-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="botao-principal"
+                >
+                    Salvar conta
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- ==================================================
+         CATEGORIAS
+    =================================================== -->
+
+    <dialog id="modalCategorias" class="modal-gerenciamento">
+
+        <div class="gerenciamento">
+
+            <div class="gerenciamento-topo">
+
+                <div>
+
+                    <span class="modal-tag">
+                        ORGANIZAÇÃO
+                    </span>
+
+                    <h2>
+                        Categorias
+                    </h2>
+
+                    <p>
+                        Organize suas receitas e despesas.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="fechar-modal"
+                    id="fecharCategorias"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="gerenciamento-acoes">
+
+                <div>
+
+                    <strong>
+                        Categorias cadastradas
+                    </strong>
+
+                    <p>
+                        Utilize categorias para organizar suas movimentações.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="botao-principal"
+                    id="novaCategoria"
+                >
+                    + Nova categoria
+                </button>
+
+            </div>
+
+
+            <div
+                id="listaCategorias"
+                class="lista-gerenciamento"
+            >
+
+                <div class="mensagem-vazia">
+                    Carregando categorias...
+                </div>
+
+            </div>
+
+        </div>
+
+    </dialog>
+
+
+    <!-- ==================================================
+         NOVA CATEGORIA
+    =================================================== -->
+
+    <dialog id="modalNovaCategoria">
+
+        <form id="formCategoria">
+
+            <div class="modal-cabecalho">
+
+                <span class="modal-tag">
+                    CATEGORIA
+                </span>
+
+                <h2>
+                    Nova categoria
+                </h2>
+
+                <p>
+                    Crie uma categoria para suas movimentações.
+                </p>
+
+            </div>
+
+
+            <label>
+
+                Nome da categoria
+
+                <input
+                    id="nomeCategoria"
+                    placeholder="Ex: Alimentação"
+                    minlength="2"
+                    required
+                >
+
+            </label>
+
+
+            <label>
+
+                Tipo da categoria
+
+                <select
+                    id="tipoCategoria"
+                    required
+                >
+
+                    <option value="DESPESA">
+                        Despesa
+                    </option>
+
+                    <option value="RECEITA">
+                        Receita
+                    </option>
+
+                </select>
+
+            </label>
+
+
+            <div class="actions">
+
+                <button
+                    type="button"
+                    id="cancelarCategoria"
+                    class="botao-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="botao-principal"
+                >
+                    Salvar categoria
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

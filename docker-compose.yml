@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: finansee-postgres
+    environment:
+      POSTGRES_USER: finansee
+      POSTGRES_PASSWORD: finansee_dev
+      POSTGRES_DB: finansee
+    ports: ["5432:5432"]
+    volumes: [finansee_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finansee -d finansee"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  finansee_data:
