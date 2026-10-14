@@ -1,3 +1,4 @@
+
 const p = require("../lib/prisma");
 const { z } = require("zod");
 
@@ -25,6 +26,23 @@ const transacaoSchema = z.object({
         .positive()
 });
 
+// Valida datas no formato AAAA-MM-DD.
+function dataValida(valor) {
+    if (typeof valor !== "string") {
+        return false;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+        return false;
+    }
+
+    const data = new Date(`${valor}T00:00:00.000Z`);
+
+    return (
+        !Number.isNaN(data.getTime()) &&
+        data.toISOString().slice(0, 10) === valor
+    );
+}
 
 // ========================================
 // LISTAR TRANSAÇÕES + FILTROS
@@ -42,10 +60,7 @@ async function listar(req, res, next) {
         const where = {};
 
         // FILTRO POR TIPO
-        if (
-            tipo === "RECEITA" ||
-            tipo === "DESPESA"
-        ) {
+        if (tipo === "RECEITA" || tipo === "DESPESA") {
             where.tipo = tipo;
         }
 
@@ -53,39 +68,67 @@ async function listar(req, res, next) {
         if (categoriaId) {
             const id = Number(categoriaId);
 
-            if (!Number.isNaN(id)) {
-                where.categoriaId = id;
+            if (
+                !Number.isInteger(id) ||
+                id <= 0
+            ) {
+                return res.status(400).json({
+                    erro: "Categoria inválida."
+                });
             }
+
+            where.categoriaId = id;
         }
 
-        // FILTRO POR PERÍODO
+        // VALIDAÇÃO DO PERÍODO
+        if (
+            (dataInicial && !dataValida(dataInicial)) ||
+            (dataFinal && !dataValida(dataFinal))
+        ) {
+            return res.status(400).json({
+                erro: "Data inválida. Use o formato AAAA-MM-DD."
+            });
+        }
+
+        if (
+            dataInicial &&
+            dataFinal &&
+            dataInicial > dataFinal
+        ) {
+            return res.status(400).json({
+                erro: "A data inicial não pode ser posterior à data final."
+            });
+        }
+
+        // FILTRO POR PERÍODO EM UTC
         if (dataInicial || dataFinal) {
             where.data = {};
 
             if (dataInicial) {
-                where.data.gte =
-                    new Date(`${dataInicial}T00:00:00`);
+                where.data.gte = new Date(
+                    `${dataInicial}T00:00:00.000Z`
+                );
             }
 
             if (dataFinal) {
-                where.data.lte =
-                    new Date(`${dataFinal}T23:59:59.999`);
+                where.data.lte = new Date(
+                    `${dataFinal}T23:59:59.999Z`
+                );
             }
         }
 
-        const transacoes =
-            await p.transacao.findMany({
-                where,
+        const transacoes = await p.transacao.findMany({
+            where,
 
-                include: {
-                    conta: true,
-                    categoria: true
-                },
+            include: {
+                conta: true,
+                categoria: true
+            },
 
-                orderBy: {
-                    data: "desc"
-                }
-            });
+            orderBy: {
+                data: "desc"
+            }
+        });
 
         res.json(transacoes);
 
@@ -94,22 +137,19 @@ async function listar(req, res, next) {
     }
 }
 
-
 // ========================================
 // CRIAR TRANSAÇÃO
 // ========================================
 
 async function criar(req, res, next) {
     try {
-        const dados =
-            transacaoSchema.parse(req.body);
+        const dados = transacaoSchema.parse(req.body);
 
-        const categoria =
-            await p.categoria.findUnique({
-                where: {
-                    id: dados.categoriaId
-                }
-            });
+        const categoria = await p.categoria.findUnique({
+            where: {
+                id: dados.categoriaId
+            }
+        });
 
         if (!categoria) {
             return res.status(404).json({
@@ -117,12 +157,11 @@ async function criar(req, res, next) {
             });
         }
 
-        const conta =
-            await p.conta.findUnique({
-                where: {
-                    id: dados.contaId
-                }
-            });
+        const conta = await p.conta.findUnique({
+            where: {
+                id: dados.contaId
+            }
+        });
 
         if (!conta) {
             return res.status(404).json({
@@ -137,23 +176,21 @@ async function criar(req, res, next) {
             });
         }
 
-        const transacao =
-            await p.transacao.create({
-                data: {
-                    descricao: dados.descricao,
-                    valor: dados.valor,
-                    tipo: dados.tipo,
-                    data: dados.data,
-                    contaId: dados.contaId,
-                    categoriaId:
-                        dados.categoriaId
-                },
+        const transacao = await p.transacao.create({
+            data: {
+                descricao: dados.descricao,
+                valor: dados.valor,
+                tipo: dados.tipo,
+                data: dados.data,
+                contaId: dados.contaId,
+                categoriaId: dados.categoriaId
+            },
 
-                include: {
-                    conta: true,
-                    categoria: true
-                }
-            });
+            include: {
+                conta: true,
+                categoria: true
+            }
+        });
 
         res.status(201).json(transacao);
 
@@ -161,7 +198,6 @@ async function criar(req, res, next) {
         next(erro);
     }
 }
-
 
 // ========================================
 // ATUALIZAR TRANSAÇÃO
@@ -171,16 +207,15 @@ async function atualizar(req, res, next) {
     try {
         const id = Number(req.params.id);
 
-        if (Number.isNaN(id)) {
+        if (!Number.isInteger(id) || id <= 0) {
             return res.status(400).json({
                 erro: "ID inválido."
             });
         }
 
-        const existente =
-            await p.transacao.findUnique({
-                where: { id }
-            });
+        const existente = await p.transacao.findUnique({
+            where: { id }
+        });
 
         if (!existente) {
             return res.status(404).json({
@@ -188,15 +223,13 @@ async function atualizar(req, res, next) {
             });
         }
 
-        const dados =
-            transacaoSchema.parse(req.body);
+        const dados = transacaoSchema.parse(req.body);
 
-        const categoria =
-            await p.categoria.findUnique({
-                where: {
-                    id: dados.categoriaId
-                }
-            });
+        const categoria = await p.categoria.findUnique({
+            where: {
+                id: dados.categoriaId
+            }
+        });
 
         if (!categoria) {
             return res.status(404).json({
@@ -204,12 +237,11 @@ async function atualizar(req, res, next) {
             });
         }
 
-        const conta =
-            await p.conta.findUnique({
-                where: {
-                    id: dados.contaId
-                }
-            });
+        const conta = await p.conta.findUnique({
+            where: {
+                id: dados.contaId
+            }
+        });
 
         if (!conta) {
             return res.status(404).json({
@@ -224,25 +256,23 @@ async function atualizar(req, res, next) {
             });
         }
 
-        const transacao =
-            await p.transacao.update({
-                where: { id },
+        const transacao = await p.transacao.update({
+            where: { id },
 
-                data: {
-                    descricao: dados.descricao,
-                    valor: dados.valor,
-                    tipo: dados.tipo,
-                    data: dados.data,
-                    contaId: dados.contaId,
-                    categoriaId:
-                        dados.categoriaId
-                },
+            data: {
+                descricao: dados.descricao,
+                valor: dados.valor,
+                tipo: dados.tipo,
+                data: dados.data,
+                contaId: dados.contaId,
+                categoriaId: dados.categoriaId
+            },
 
-                include: {
-                    conta: true,
-                    categoria: true
-                }
-            });
+            include: {
+                conta: true,
+                categoria: true
+            }
+        });
 
         res.json(transacao);
 
@@ -250,7 +280,6 @@ async function atualizar(req, res, next) {
         next(erro);
     }
 }
-
 
 // ========================================
 // EXCLUIR TRANSAÇÃO
@@ -260,16 +289,15 @@ async function remover(req, res, next) {
     try {
         const id = Number(req.params.id);
 
-        if (Number.isNaN(id)) {
+        if (!Number.isInteger(id) || id <= 0) {
             return res.status(400).json({
                 erro: "ID inválido."
             });
         }
 
-        const existente =
-            await p.transacao.findUnique({
-                where: { id }
-            });
+        const existente = await p.transacao.findUnique({
+            where: { id }
+        });
 
         if (!existente) {
             return res.status(404).json({
@@ -287,7 +315,6 @@ async function remover(req, res, next) {
         next(erro);
     }
 }
-
 
 module.exports = {
     listar,

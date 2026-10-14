@@ -147,3 +147,52 @@ test('DELETE /api/transacoes/999999 retorna HTTP 404', async () => {
     'Transação não encontrada.'
   );
 });
+
+// TESTE 07 — FILTRAR UM ÚNICO DIA
+
+test('GET /api/transacoes filtra corretamente um dia', async () => {
+  const resposta = await requisicao(
+    'GET',
+    '/api/transacoes?dataInicial=2026-10-01&dataFinal=2026-10-01'
+  );
+
+  assert.equal(resposta.status, 200);
+  assert.ok(Array.isArray(resposta.dados));
+
+  for (const transacao of resposta.dados) {
+    assert.equal(
+      transacao.data.slice(0, 10),
+      '2026-10-01'
+    );
+  }
+});
+
+// TESTE 08 — REJEITAR DATA INVÁLIDA
+
+test('GET /api/transacoes rejeita data invalida', async () => {
+  const resposta = await requisicao(
+    'GET',
+    '/api/transacoes?dataInicial=2026-02-30'
+  );
+
+  assert.equal(resposta.status, 400);
+  assert.equal(
+    resposta.dados.erro,
+    'Data inválida. Use o formato AAAA-MM-DD.'
+  );
+});
+
+// TESTE 09 — REJEITAR PERÍODO INVERTIDO
+
+test('GET /api/transacoes rejeita periodo invertido', async () => {
+  const resposta = await requisicao(
+    'GET',
+    '/api/transacoes?dataInicial=2026-10-10&dataFinal=2026-10-01'
+  );
+
+  assert.equal(resposta.status, 400);
+  assert.equal(
+    resposta.dados.erro,
+    'A data inicial não pode ser posterior à data final.'
+  );
+});
