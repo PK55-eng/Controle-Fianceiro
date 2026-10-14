@@ -3,7 +3,7 @@
 
 O FinanSee é um sistema web desenvolvido para auxiliar no controle financeiro pessoal.
 
-A aplicação permite cadastrar contas, categorias, receitas e despesas, além de acompanhar o saldo, visualizar gráficos e consultar o histórico de movimentações.
+A aplicação permite cadastrar contas, categorias, receitas e despesas, acompanhar o saldo, visualizar gráficos e consultar o histórico de movimentações financeiras.
 
 ## Tecnologias utilizadas
 
@@ -11,7 +11,7 @@ A aplicação permite cadastrar contas, categorias, receitas e despesas, além d
 - HTML
 - CSS
 - JavaScript
-- Chart.js
+- Chart.js (armazenado localmente para funcionar sem internet)
 
 ### Backend
 - Node.js 22
@@ -80,7 +80,7 @@ Copie o arquivo de exemplo:
 cp .env.example .env
 ```
 
-O arquivo `.env` contém a configuração local de conexão com o banco.
+O arquivo `.env` contém a configuração local de conexão com o banco de dados.
 
 Não publique credenciais reais no GitHub.
 
@@ -110,15 +110,19 @@ npx prisma generate
 npx prisma migrate deploy
 ```
 
-Esse comando aplica as migrações já existentes no projeto.
+Esse comando aplica as migrações existentes no projeto.
 
-### 7. Inserir os dados iniciais
+### 7. Inserir os dados de demonstração
 
 ```bash
 npm run db:seed
 ```
 
-Esse comando executa o script de dados iniciais do projeto.
+Em um banco sem transações, esse comando cria uma conta, categorias e 14 transações fictícias distribuídas entre agosto, setembro e outubro de 2026.
+
+Os dados permitem demonstrar os indicadores financeiros e o gráfico de evolução mensal.
+
+Se já existirem transações cadastradas, o script preserva os registros existentes e não insere novas transações de demonstração.
 
 ### 8. Iniciar a aplicação
 
@@ -130,6 +134,8 @@ Acesse no navegador:
 
 http://localhost:3000
 
+Para encerrar o servidor, pressione `Ctrl + C` no terminal.
+
 ## Testes automatizados
 
 Com o PostgreSQL em execução e o banco configurado, execute:
@@ -140,7 +146,7 @@ npm test
 
 Os testes utilizam o módulo nativo `node:test`.
 
-Os casos implementados verificam:
+Os nove casos implementados verificam:
 
 1. Consulta de transações.
 2. Rejeição de valor negativo.
@@ -148,13 +154,18 @@ Os casos implementados verificam:
 4. Consulta do dashboard.
 5. Tentativa de edição de transação inexistente.
 6. Tentativa de exclusão de transação inexistente.
+7. Filtro de transações por um único dia.
+8. Rejeição de data inválida.
+9. Rejeição de período invertido.
 
-Na última execução registrada, os seis testes foram aprovados.
+Na última execução registrada, os nove testes foram aprovados, sem falhas.
+
+Os resultados detalhados estão documentados em `docs/TESTES.md`.
 
 ## API REST
 
 | Método | Endpoint | Descrição |
-|--------|----------|-----------|
+|---|---|---|
 | GET | /api/dashboard | Consultar resumo financeiro |
 | GET | /api/transacoes | Listar transações |
 | POST | /api/transacoes | Cadastrar transação |
@@ -174,11 +185,19 @@ O endpoint `GET /api/transacoes` permite filtrar por:
 - `dataInicial`
 - `dataFinal`
 
-Exemplo:
+Exemplo de filtro por tipo:
 
 ```text
 /api/transacoes?tipo=DESPESA
 ```
+
+Exemplo de filtro por período:
+
+```text
+/api/transacoes?dataInicial=2026-10-01&dataFinal=2026-10-31
+```
+
+As datas dos filtros devem ser informadas no formato `AAAA-MM-DD`.
 
 ## Estrutura do projeto
 
@@ -197,6 +216,8 @@ Controle-Fianceiro/
 │   ├── schema.prisma
 │   └── seed.js
 ├── public/
+│   ├── vendor/
+│   │   └── chart.umd.js
 │   ├── index.html
 │   ├── style.css
 │   └── script.js
@@ -214,6 +235,7 @@ Controle-Fianceiro/
 ├── .gitignore
 ├── docker-compose.yml
 ├── package.json
+├── package-lock.json
 ├── IA_LOG.md
 ├── DOCUMENTACAO_IA.md
 └── README.md
@@ -229,12 +251,24 @@ Os documentos do projeto estão na pasta `docs/`:
 - `DER.md`: modelo de dados e relacionamentos.
 - `PROTOTIPO.md`: planejamento e evidências do protótipo.
 - `KANBAN_PLANEJAMENTO.md`: planejamento das atividades.
-- `TESTES.md`: registro dos testes.
+- `TESTES.md`: registro dos testes manuais e automatizados.
 
 O uso de inteligência artificial está documentado em:
 
 - `IA_LOG.md`
 - `DOCUMENTACAO_IA.md`
+
+## Segurança e dependências
+
+A aplicação utiliza validação de dados com Zod e cabeçalhos de segurança configurados com Helmet.
+
+Foi realizada uma análise de dependências com `npm audit`.
+
+A biblioteca Morgan foi atualizada para a versão 1.12.1 para corrigir alertas identificados.
+
+Na última análise, permaneceram quatro alertas de severidade alta relacionados às dependências indiretas `deepmerge-ts` e `effect`, utilizadas pela ferramenta Prisma.
+
+Esses alertas permanecem registrados para avaliação. Não foi realizada atualização forçada que pudesse comprometer a compatibilidade do projeto.
 
 ## Limites do escopo
 
@@ -250,10 +284,16 @@ Nesta versão, o FinanSee não contempla:
 
 O projeto utiliza Git e GitHub.
 
-Os commits registram etapas reais de desenvolvimento, testes e documentação.
+Os commits registram etapas reais de desenvolvimento, correções, testes e documentação.
+
+Repositório:
+
+https://github.com/PK55-eng/Controle-Fianceiro
 
 ## Observações
 
 A aplicação foi desenvolvida para execução local.
 
-Para utilizá-la, é necessário iniciar o banco PostgreSQL e configurar corretamente as variáveis de ambiente.
+Para utilizá-la, é necessário iniciar o PostgreSQL e configurar corretamente as variáveis de ambiente.
+
+Os dados de demonstração são fictícios e utilizados exclusivamente para apresentar as funcionalidades do sistema.
